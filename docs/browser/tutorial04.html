@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script src="https://www.lactame.com/lib/image-js/0.21.2/image.min.js"></script>
+
+<!-- highlight.js for nicely visualizing the javascript code, it is not needed for nlScript  -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/intellij-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<style>
+body {
+  max-width: 800px;
+  margin: auto;
+}
+h2 {
+  border-bottom: 1px solid darkgray;
+}
+.nav {
+  color: black;
+  text-decoration: none;
+  background-color: beige;
+  padding: 5px;
+  border-radius: 5px;
+}
+.nav:hover {
+  background-color: aliceblue;
+}
+</style>
+
+<!-- The only javascript file needed for nlScript -->
+<script src="index.cjs"></script>
+
+
+<h1>Tutorial 04</h1>
+
+<div style="display: flex; justify-content: space-between;">
+<a class="nav" href="tutorial03.html">Previous</a>
+<a class="nav" href="index.html">Table of contents</a>
+<a class="nav" href="tutorial05.html">Next</a>
+</div>
+
+<h2>Description</h2>
+
+<p>The previous tutorial introduced custom types.</br>
+In Tutorial04, they will be used to change how they are autocompleted in the editor.</p>
+
+<p>For details, see also</p>
+<ul>
+<li><a href="https://nlScript.github.io/nlScript-java/#fine-tuning-autocompletion-parameterized-autocompletion">
+             https://nlScript.github.io/nlScript-java/#fine-tuning-autocompletion-parameterized-autocompletion</a></li>
+</ul>
+
+<h2>The code</h2>
+
+<pre><code class="html">
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;!-- The HTML element that will hold the editor --&gt;
+    &lt;div id="nls-container"&gt;&lt;/div&gt;
+
+    &lt;!-- The only javascript file needed for nlScript --&gt;
+    &lt;script src="index.cjs"&gt;&lt;/script&gt;
+
+    &lt;!-- Load the library for the actual processing --&gt;
+    &lt;script src="preprocessing.js"&gt;&lt;/script&gt;
+
+    &lt;script&gt;
+      let preprocessing = new Preprocessing("output");
+      
+      let parser = new nlScript.Parser();
+
+      // In contrast to the previous tutorial, a third parameter is given, which specifies whether to
+      // insert the entire sequence when auto-completing or not.
+      //
+      // The default is false, which means that once the user input reaches the filter size, the editor will wait
+      // until a number is entered. This might be unintuitive, because it might not be clear to the user what is
+      // expected (e.g. in which units to enter the value).
+      //
+      // If set to 'true', the entire sequence will be inserted, i.e. a placeholder for 'stddev' (which is selected
+      // so that the user can readily overwrite it), concatenated with the literal 'pixel(s)'.
+      parser.defineType(
+        "filter-size",
+        "{stddev:float} pixel(s)",
+        pn => pn.evaluate("stddev"),
+        true);
+      
+      parser.defineSentence(
+        "Apply Gaussian blurring with a standard deviation of {stddev:filter-size}.",
+        pn => {
+          let stdDev = pn.evaluate("stddev");
+          preprocessing.gaussianBlur(stdDev);
+          preprocessing.show("output");
+          return undefined;
+        });
+
+      new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+
+<h2>Demo</h2>
+
+<!-- The only HTML element needed for nlScript, which will be populated with the editor -->
+<div id="nls-container"></div>
+
+<h2>The result</h2>
+<img id="input"  src="https://imagej.net/images/clown.jpg"></img>
+<img id="output" src="https://imagej.net/images/clown.jpg"></img>
+
+<p>
+</p>
+
+
+
+
+<!-- Here comes the actual javascript code that demonstrates how to use nlScript -->
+<script src="preprocessing.js"></script>
+<script>
+let preprocessing = new Preprocessing("output");
+
+let parser = new nlScript.Parser();
+
+parser.defineType(
+  "filter-size",
+  "{stddev:float} pixel(s)",
+  pn => pn.evaluate("stddev"),
+  true);
+
+parser.defineSentence(
+  "Apply Gaussian blurring with a standard deviation of {stddev:filter-size}.",
+  pn => {
+    let stdDev = pn.evaluate("stddev");
+    preprocessing.gaussianBlur(stdDev);
+    preprocessing.show("output");
+    return undefined;
+  });
+
+new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+</script>
+
+
+
+</body>
+</html>
+
+

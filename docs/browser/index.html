@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<style>
+body {
+  max-width: 800px;
+  margin: auto;
+}
+h2 {
+}
+.nav {
+  color: black;
+  text-decoration: none;
+  background-color: beige;
+  padding: 5px;
+  border-radius: 5px;
+}
+.nav:hover {
+  background-color: aliceblue;
+}
+</style>
+
+
+<h1>nlScript tutorial for JavaScript</h1>
+
+
+<h2><a href="tutorial01.html">Tutorial 01</a></h2>
+
+<p>This is a basic example how nlScript works in principle. It demonstrates the three steps involved:</p>
+<ul>
+<li>Creating a parser
+<li>Teach the parser the sentences to accept
+<li>Show a dedicated editor with autocompletion adjusted to the defined language
+</ul>
+
+<p>Please note that the 2nd argument to 'defineSentence' is undefined, so that nothing actually happens when the user clicks on the editor's Run button.</p>
+
+<p>This will be addressed in Tutorial02</p>
+
+
+<h2><a href="tutorial02.html">Tutorial 02</a></h2>
+<p>Tutorial02 extends the previous one by specifying a 2nd parameter to
+'defineSentence', an object of type Evaluator. Evaluator is an interface with a
+single function evaluate(), which is called upon parsing the corresponding sentence.</p>
+
+<p><i>Note:</i></br>
+The Evaluator can be specified more concisely using a lambda expression. Here, an anonymous
+class is used to be explicit on the types.</p>
+
+
+<h2><a href="tutorial03.html">Tutorial 03</a></h2>
+<p>Tutorial03 introduces custom types.</p>
+
+<p>Custom types are specified similar to sentences, but</p>
+<ul>
+<li>an explicit type name is given</li>
+<li>their evaluator typically doesn't return null, but an arbitrary Java object representing that type</li>
+</ul>
+
+<p>In this particular example, using a custom type for the filter size doesn't provide any advantage. In general, one
+would use custom types to</p>
+<ul>
+<li>reuse them in multiple sentences or other types</li>
+<li>to fine-tune the way they are auto-completed in the editor.</li>
+</ul>
+
+<p>This will be demonstrated in subsequent tutorials.</p>
+
+
+
+
+<h2><a href="tutorial04.html">Tutorial 04</a></h2>
+<p>The previous tutorial introduced custom types.</br>
+In Tutorial04, they will be used to change how they are autocompleted in the editor.</p>
+
+
+
+<h2><a href="tutorial05.html">Tutorial 05</a></h2>
+<p>Tutorial05 demonstrates how to provide multiple definitions for a type. The type 'units' is first
+defined as the string literal "pixel(s)" and additionally as "calibrated units".</p>
+
+<p>As a result, once the user hits the corresponding position during input, an autocompletion menu will be
+displayed to select between the two.</p>
+
+
+
+<h2><a href="tutorial06.html">Tutorial 06</a></h2>
+<p>Tutorial06 shows how to use a fully custom Autocompleter, with the goal to replace the
+static "calibrated units" option for the "units" type with the actual units string of
+the currently open image.</p>
+
+<p>There is one (autocompletion) issue here, which will be addressed in the next tutorial:
+Once the user starts typing the text for the unit (let's say a 'p' for 'pixel(s)'), completion
+should stop (or even better, only suggest 'pixel(s)', because 'mm' doesn't start with 'p').
+However, here it will just continue to suggest 'pixel(s)' as well as 'mm'.</p>
+
+
+
+<h2><a href="tutorial07.html">Tutorial 07</a></h2>
+<p>The previous tutorial showed how to use a custom Autocompleter, but suffered from one
+autocompletion issue:</p>
+
+<p>Once the user starts typing the text for the unit (let's say a 'p' for 'pixel(s)'), completion
+should stop (or even better, only suggest 'pixel(s)', because 'mm' doesn't start with 'p').
+However, here it will just continue to suggest 'pixel(s)' as well as 'mm'.</p>
+
+<p>This tutorial demonstrates how to stop autocompletion once the user started typing a value.</p>
+
+<p>In the case here, it would actually be better to filter suggested options according to what the user typed,
+(and this will be shown in the next tutorial), but there are cases where stopping auto-completion after the
+user started to type is important: This is particularly the case if e.g. entering numbers: As long as nothing
+is entered, auto-completion should indicate what needs to be entered (e.g. a placeholder with a name), but once
+the user started typing a number, auto-completion should be quiet. BTW: This is not only true for numbers, but
+for also e.g. when entering a name for something.</p>
+
+
+
+<h2><a href="tutorial08.html">Tutorial 08</a></h2>
+<p>The previous tutorial showed how to use a custom Autocompleter. Using a ParseStartListener, the pixel
+calibration unit string is saved. The 'units' autocompleter then suggests the two options 'pixel(s)'
+and the actual calibration unit string.</p>
+
+<p>A much better solution would be, if the 'units' type could be defined as 'pixel(s)' and as 'mm' in the
+first place (similar to Tutorial05), and this would work here because the image to be processed is fixed.</p>
+
+<p>However, in a more general case, the designed language should work on any image, and therefore, at the
+time of designing the language the actual pixel units are not known yet, and this is why Tutorial05
+used the fixed literal 'calibrated units' instead of the actual units string.</p>
+
+<p>This tutorial shows how the 'units' type can be re-defined dynamically, and this is again best done
+within in the ParseStartListener's parsingStarted() function.</p>
+
+<p>The result will be similar to that of Tutorial05, but instead of the general 'calibrated units'
+autocompletion option, the actual units string will be shown as an option.</p>
+
+
+
+<h2><a href="tutorial09.html">Tutorial 09</a></h2>
+<p>This tutorial extends the previous functionality by median filtering, background subtraction and intensity
+normalization, simply by adding more sentence definitions similar to the existing one for Gaussian blurring.</p>
+
+<p>The new sentences also re-use the 'filter-size' type.</p>
+
+
+
+</body>
+</html>
+

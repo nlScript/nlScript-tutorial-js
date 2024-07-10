@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script src="https://www.lactame.com/lib/image-js/0.21.2/image.min.js"></script>
+
+<!-- highlight.js for nicely visualizing the javascript code, it is not needed for nlScript  -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/intellij-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<style>
+body {
+  max-width: 800px;
+  margin: auto;
+}
+h2 {
+  border-bottom: 1px solid darkgray;
+}
+.nav {
+  color: black;
+  text-decoration: none;
+  background-color: beige;
+  padding: 5px;
+  border-radius: 5px;
+}
+.nav:hover {
+  background-color: aliceblue;
+}
+</style>
+
+<!-- The only javascript file needed for nlScript -->
+<script src="index.cjs"></script>
+
+
+<h1>Tutorial 05</h1>
+
+<div style="display: flex; justify-content: space-between;">
+<a class="nav" href="tutorial04.html">Previous</a>
+<a class="nav" href="index.html">Table of contents</a>
+<a class="nav" href="tutorial06.html">Next</a>
+</div>
+
+<h2>Description</h2>
+
+<p>Tutorial05 demonstrates how to provide multiple definitions for a type. The type 'units' is first
+defined as the string literal "pixel(s)" and additionally as "calibrated units".</p>
+
+<p>As a result, once the user hits the corresponding position during input, an autocompletion menu will be
+displayed to select between the two.</p>
+
+<p>For details, see also</p>
+<ul>
+<li><a href="https://nlScript.github.io/nlScript-java/#multiple-choice-autocompletion-choose-a-unit-for-filter-size">
+             https://nlScript.github.io/nlScript-java/#multiple-choice-autocompletion-choose-a-unit-for-filter-size</a></li>
+</ul>
+
+
+<h2>The code</h2>
+
+<pre><code class="html">
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;!-- The HTML element that will hold the editor --&gt;
+    &lt;div id="nls-container"&gt;&lt;/div&gt;
+
+    &lt;!-- The only javascript file needed for nlScript --&gt;
+    &lt;script src="index.cjs"&gt;&lt;/script&gt;
+
+    &lt;!-- Load the library for the actual processing --&gt;
+    &lt;script src="preprocessing.js"&gt;&lt;/script&gt;
+
+    &lt;script&gt;
+      let preprocessing = new Preprocessing("output");
+      
+      let parser = new nlScript.Parser();
+
+      // 1. Define the type "units" as the string literal "pixel(s)"
+      parser.defineType("units", "pixel(s)", pn => false);
+
+      // 2. Define the type "units" as the string literal "calibrated units"
+      parser.defineType("units", "calibrated units", pn => true);
+      
+      parser.defineType("filter-size", "{stddev:float} {units:units}", pn => {
+        let stddev = pn.evaluate("stddev");
+
+        // Note that the "units" type evaluates to a Boolean, which is true if "calibrated units" was
+        // parsed, and false if "pixel(s)" was parsed
+        let units = pn.evaluate("units");
+
+        // Convert stddev to pixel units in case it was specified in calibrated units
+        if(units)
+          stddev /= preprocessing.getPixelWidth();
+        return stddev;
+      }, true);
+      
+      parser.defineSentence(
+        "Apply Gaussian blurring with a standard deviation of {stddev:filter-size}.",
+        pn => {
+          let stdDev = pn.evaluate("stddev");
+          preprocessing.gaussianBlur(stdDev);
+          preprocessing.show("output");
+          return undefined;
+        });
+
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+
+<h2>Demo</h2>
+
+<!-- The only HTML element needed for nlScript, which will be populated with the editor -->
+<div id="nls-container"></div>
+
+<h2>The result</h2>
+<img id="input"  src="https://imagej.net/images/clown.jpg"></img>
+<img id="output" src="https://imagej.net/images/clown.jpg"></img>
+
+<p>
+</p>
+
+
+
+
+<!-- Here comes the actual javascript code that demonstrates how to use nlScript -->
+<script src="preprocessing.js"></script>
+<script>
+let preprocessing = new Preprocessing("output");
+
+let parser = new nlScript.Parser();
+
+parser.defineType("units", "pixel(s)", pn => false);
+parser.defineType("units", "calibrated units", pn => true);
+
+parser.defineType("filter-size", "{stddev:float} {units:units}", pn => {
+  let stddev = pn.evaluate("stddev");
+  let units = pn.evaluate("units");
+  if(units)
+    stddev /= preprocessing.getPixelWidth();
+  return stddev;
+}, true);
+
+parser.defineSentence(
+  "Apply Gaussian blurring with a standard deviation of {stddev:filter-size}.",
+  pn => {
+    let stdDev = pn.evaluate("stddev");
+    preprocessing.gaussianBlur(stdDev);
+    preprocessing.show("output");
+    return undefined;
+  });
+
+new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+</script>
+
+
+
+</body>
+</html>
+
+
+
