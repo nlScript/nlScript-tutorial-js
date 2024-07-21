@@ -4,6 +4,6 @@ This repository contains a step-by-step tutorial how to use nlScript (https://gi
 
 More information and explanations are found at https://nlScript.github.io/nlScript-java.
 
-You can access the web version of the tutorial at https://nlScript.github.io/nlScript-js
+You can access the web version of the tutorial at https://nlScript.github.io/nlScript-tutorial-js
 
-nlScript is also available in other languages, see https://github.com/nlScript
+nlScript is also available in other languages, see https://github.com/nlScript/repositories
