@@ -6,4 +6,4 @@ More information and explanations are found at https://nlScript.github.io/nlScri
 
 You can access the web version of the tutorial at https://nlScript.github.io/nlScript-tutorial-js
 
-nlScript is also available in other languages, see https://github.com/nlScript/repositories
+nlScript is also available in other languages, see https://github.com/orgs/nlScript/repositories
