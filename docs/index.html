@@ -7,7 +7,14 @@ body {
   max-width: 800px;
   margin: auto;
 }
+h1 {
+  color: rgb(123, 136, 175);
+}
 h2 {
+  border-bottom: 1px solid darkgray;
+}
+h2 a {
+  text-decoration: none;
 }
 .nav {
   color: black;
@@ -25,7 +32,9 @@ h2 {
 <h1>nlScript tutorial for JavaScript</h1>
 
 
-<h2><a href="tutorial01.html">Tutorial 01</a></h2>
+<h2>Tutorial 01 <a target="_blank" href="tutorial01.html">(link)</a></h2>
+
+
 
 <p>This is a basic example how nlScript works in principle. It demonstrates the three steps involved:</p>
 <ul>
@@ -39,7 +48,7 @@ h2 {
 <p>This will be addressed in Tutorial02</p>
 
 
-<h2><a href="tutorial02.html">Tutorial 02</a></h2>
+<h2>Tutorial 02 <a target="_blank" href="tutorial02.html">(link)</a></h2>
 <p>Tutorial02 extends the previous one by specifying a 2nd parameter to
 'defineSentence', an object of type Evaluator. Evaluator is an interface with a
 single function evaluate(), which is called upon parsing the corresponding sentence.</p>
@@ -49,7 +58,7 @@ The Evaluator can be specified more concisely using a lambda expression. Here, a
 class is used to be explicit on the types.</p>
 
 
-<h2><a href="tutorial03.html">Tutorial 03</a></h2>
+<h2>Tutorial 03 <a target="_blank" href="tutorial03.html">(link)</a></h2>
 <p>Tutorial03 introduces custom types.</p>
 
 <p>Custom types are specified similar to sentences, but</p>
@@ -70,13 +79,13 @@ would use custom types to</p>
 
 
 
-<h2><a href="tutorial04.html">Tutorial 04</a></h2>
+<h2>Tutorial 04 <a target="_blank" href="tutorial04.html">(link)</a></h2>
 <p>The previous tutorial introduced custom types.</br>
 In Tutorial04, they will be used to change how they are autocompleted in the editor.</p>
 
 
 
-<h2><a href="tutorial05.html">Tutorial 05</a></h2>
+<h2>Tutorial 05 <a target="_blank" href="tutorial05.html">(link)</a></h2>
 <p>Tutorial05 demonstrates how to provide multiple definitions for a type. The type 'units' is first
 defined as the string literal "pixel(s)" and additionally as "calibrated units".</p>
 
@@ -85,7 +94,7 @@ displayed to select between the two.</p>
 
 
 
-<h2><a href="tutorial06.html">Tutorial 06</a></h2>
+<h2>Tutorial 06 <a target="_blank" href="tutorial06.html">(link)</a></h2>
 <p>Tutorial06 shows how to use a fully custom Autocompleter, with the goal to replace the
 static "calibrated units" option for the "units" type with the actual units string of
 the currently open image.</p>
@@ -97,7 +106,7 @@ However, here it will just continue to suggest 'pixel(s)' as well as 'mm'.</p>
 
 
 
-<h2><a href="tutorial07.html">Tutorial 07</a></h2>
+<h2>Tutorial 07 <a target="_blank" href="tutorial07.html">(link)</a></h2>
 <p>The previous tutorial showed how to use a custom Autocompleter, but suffered from one
 autocompletion issue:</p>
 
@@ -116,7 +125,7 @@ for also e.g. when entering a name for something.</p>
 
 
 
-<h2><a href="tutorial08.html">Tutorial 08</a></h2>
+<h2>Tutorial 08 <a target="_blank" href="tutorial08.html">(link)</a></h2>
 <p>The previous tutorial showed how to use a custom Autocompleter. Using a ParseStartListener, the pixel
 calibration unit string is saved. The 'units' autocompleter then suggests the two options 'pixel(s)'
 and the actual calibration unit string.</p>
@@ -136,7 +145,7 @@ autocompletion option, the actual units string will be shown as an option.</p>
 
 
 
-<h2><a href="tutorial09.html">Tutorial 09</a></h2>
+<h2>Tutorial 09 <a target="_blank" href="tutorial09.html">(link)</a></h2>
 <p>This tutorial extends the previous functionality by median filtering, background subtraction and intensity
 normalization, simply by adding more sentence definitions similar to the existing one for Gaussian blurring.</p>
 
