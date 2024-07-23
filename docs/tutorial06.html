@@ -100,7 +100,7 @@ However, here it will just continue to suggest 'pixel(s)' as well as 'mm'.</p>
         // Here we use the saved pixel calibration unit string to specify a custom Autocompleter,
         // which in this case returns 2 literals, "pixel(s)" and the value of imageUnits.
         // The Autocompletion class provides many convenience functions for creating Autocompleters.
-        { getAutocompletion: (pn, justCheck) => nlScript.Autocompletion.literal(pn, ["pixel(s)", imageUnits]) });
+        (pn, justCheck) => nlScript.Autocompletion.literal(pn, ["pixel(s)", imageUnits]));
       
       parser.defineType("filter-size", "{stddev:float} {units:units}", pn => {
         let stddev = pn.evaluate("stddev");
@@ -158,7 +158,7 @@ parser.addParseStartListener(() => {
 
 parser.defineType("units", "{unitstring:[a-zA-Z()]:+}",
   pn => pn.getParsedString() !== "pixel(s)",
-  { getAutocompletion: (pn, justCheck) => nlScript.Autocompletion.literal(pn, ["pixel(s)", imageUnits]) });
+  (pn, justCheck) => nlScript.Autocompletion.literal(pn, ["pixel(s)", imageUnits]));
 
 parser.defineType("filter-size", "{stddev:float} {units:units}", pn => {
   let stddev = pn.evaluate("stddev");

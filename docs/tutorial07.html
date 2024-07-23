@@ -101,9 +101,9 @@ for also e.g. when entering a name for something.</p>
         // which case pn.getParsedString() returns what's already entered.
         // If something was entered, a special 'veto' autocompleter is returned,
         // which prohibits further auto-completion.
-        { getAutocompletion: (pn, justCheck) => pn.getParsedString().length === 0
+        (pn, justCheck) => pn.getParsedString().length === 0
             ? nlScript.Autocompletion.literal(pn, ["pixel(s)", imageUnits])
-            : nlScript.Autocompletion.veto(pn) });
+            : nlScript.Autocompletion.veto(pn));
       
       parser.defineType("filter-size", "{stddev:float} {units:units}", pn => {
         let stddev = pn.evaluate("stddev");
@@ -161,9 +161,9 @@ parser.addParseStartListener(() => {
 
 parser.defineType("units", "{unitstring:[a-zA-Z()]:+}",
   pn => pn.getParsedString() !== "pixel(s)",
-  { getAutocompletion: (pn, justCheck) => pn.getParsedString().length === 0
+  (pn, justCheck) => pn.getParsedString().length === 0
       ? nlScript.Autocompletion.literal(pn, ["pixel(s)", imageUnits])
-      : nlScript.Autocompletion.veto(pn) });
+      : nlScript.Autocompletion.veto(pn));
 
 parser.defineType("filter-size", "{stddev:float} {units:units}", pn => {
   let stddev = pn.evaluate("stddev");
