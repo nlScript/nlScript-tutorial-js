@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<!-- highlight.js for nicely visualizing the javascript code, it is not needed for nlScript  -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/intellij-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<style>
+body {
+  max-width: 800px;
+  margin: auto;
+}
+h2 {
+  border-bottom: 1px solid darkgray;
+}
+.nav {
+  color: black;
+  text-decoration: none;
+  background-color: beige;
+  padding: 5px;
+  border-radius: 5px;
+}
+.nav:hover {
+  background-color: aliceblue;
+}
+</style>
+
+<!-- The only javascript file needed for nlScript -->
+<script src="https://cdn.jsdelivr.net/npm/@nlscript/nlscript@0.3.0/dist/umd/nlScript.js"></script>
+
+
+<h1>nlScript Demos</h1>
+
+<div style="display: flex; justify-content: space-between;">
+<a class="nav" style="border: #88745a 1px solid;" href="tutorial12.html">Image Pre-processing</a>
+<a class="nav" style="border: #88745a 1px solid;" href="tutorial11.html">Configuring a staining robot</a>
+<a class="nav" style="border: #88745a 3px solid;" href="tutorial10.html">Arrange a scientific figure</a>
+<a class="nav" style="border: #88745a 1px solid;" target="_blank" href="https://nlscript.github.io/nlScript-microscope-language-js/">Configuring a microscope timelapse experiment</a>
+</div>
+
+<h2>Description</h2>
+
+<p>This is a simple page demonstrating an nlScript language for arranging scientific features. The real functionality is available in a Java implementation, as a <a target="_blank" href="https://fiji.sc">Fiji</a> plugin, at <a target="_blank" href="https://github.com/nlScript/nlFigure">https://github.com/nlScript/nlFigure</a>. It can generate a figure like this:</p>
+
+<img style="display: block; margin-left: auto; margin-right: auto; width: 60%;" src="example-figure.png" />
+
+
+<h2>Demo</h2>
+
+<!-- The only HTML element needed for nlScript, which will be populated with the editor -->
+<div id="nls-container"></div>
+
+
+
+<h2>The code</h2>
+
+<pre><code class="javascript">
+let parser = new nlScript.Parser();
+
+
+parser.defineType("title", "'{title:[^']:+}'", undefined, true);
+
+parser.defineType("visibility", "visible", e => true);
+parser.defineType("visibility", "invisible", e => false);
+
+parser.defineType("font-name", "Helvetica", undefined);
+parser.defineType("font-name", "Arial", undefined);
+parser.defineType("font-name", "Courier", undefined);
+
+parser.defineType("font-style", "plain", undefined);
+parser.defineType("font-style", "bold", undefined);
+parser.defineType("font-style", "italic", undefined);
+
+parser.defineType("font-size", "{font-size:int}pt", undefined, true);
+
+parser.defineType("font", "{font-size:font-size} {font-style:font-style} {font-name:font-name}", undefined, true);
+
+parser.defineType("page-size", "A4", undefined);
+parser.defineType("page-size", "A3", undefined);
+parser.defineType("page-size", "A2", undefined);
+parser.defineType("page-size", "A1", undefined);
+parser.defineType("page-size", "A0", undefined);
+parser.defineType("page-size", "A5", undefined);
+
+parser.defineType("page-orientation", "landscape", undefined);
+parser.defineType("page-orientation", "portrait",  undefined);
+
+parser.defineType("alignment", "TOP_LEFT",      undefined); 
+parser.defineType("alignment", "TOP_CENTER",    undefined); 
+parser.defineType("alignment", "TOP_RIGHT",     undefined); 
+parser.defineType("alignment", "CENTER_LEFT",   undefined); 
+parser.defineType("alignment", "CENTERED",      undefined); 
+parser.defineType("alignment", "CENTER_RIGHT",  undefined); 
+parser.defineType("alignment", "BOTTOM_LEFT",   undefined); 
+parser.defineType("alignment", "BOTTOM_CENTER", undefined); 
+parser.defineType("alignment", "BOTTOM_RIGHT",  undefined); 
+
+parser.defineType("label-scheme", "LOWERCASE_LETTERS.", undefined); 
+parser.defineType("label-scheme", "UPPERCASE_LETTERS.", undefined); 
+parser.defineType("label-scheme", "NUMBERS.",           undefined); 
+
+parser.defineType("borders", "{borders:tuple<float,top,left,bottom,right>} mm", undefined, true);
+
+// Document setup
+// --------------
+parser.defineSentence("{Set the document} size to {ps:page-size} {po:page-orientation}.", undefined);
+parser.defineSentence("{Set the document} borders to {borders:borders}.", undefined);
+
+// Title setup
+// -----------
+parser.defineSentence("{Set the title} {text} to {title:title}.", undefined);
+parser.defineSentence("{Set the title} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the title} {font} to {f:font}.", undefined);
+
+// Headings setup
+// --------------
+parser.defineSentence("{Set the headings} {text} {of column} {c:int} to {h:title}.", undefined);
+parser.defineSentence("{Set the headings} {text} {of row} {r:int} to {h:title}.", undefined);
+parser.defineSentence("{Set the headings} {text font} to {f:font}.", undefined);
+parser.defineSentence("{Set the headings} {frame thickness} to {thickness:float}.", undefined);
+parser.defineSentence("{Set the headings} {text color} to {c:color}.", undefined);
+parser.defineSentence("{Set the headings} {frame color} to {c:color}.", undefined);
+parser.defineSentence("{Set the headings} {background color} to {c:color}.", undefined);
+parser.defineSentence("{Set the headings} {frame invisible}.", undefined);
+parser.defineSentence("{Set the headings} {frame visible}.", undefined);
+
+// Image setup
+// -----------
+parser.defineSentence("{Set the image title} {font} to {f:font}.", undefined);
+parser.defineSentence("{Set the image title} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the image title} {position} to {a:alignment}.", undefined);
+parser.defineSentence("{Set the image title} {gap} to {g:float}.", undefined);
+parser.defineSentence("{Set the image title} {visible}.", undefined);
+parser.defineSentence("{Set the image title} {invisible}.", undefined);
+parser.defineSentence("{Set the image frame} {thickness} to {thickness:float}.", undefined);
+parser.defineSentence("{Set the image frame} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the image frame} {visible}", undefined);
+parser.defineSentence("{Set the image frame} {invisible}", undefined);
+
+parser.defineType("scalebar-position", "top left",     undefined);
+parser.defineType("scalebar-position", "top right",    undefined);
+parser.defineType("scalebar-position", "bottom left",  undefined);
+parser.defineType("scalebar-position", "bottom right", undefined);
+
+parser.defineSentence("{Set the image scalebar} {position} to {position:scalebar-position}.", undefined);
+parser.defineSentence("{Set the image scalebar} {length} to {l:float}.", undefined);
+parser.defineSentence("{Set the image scalebar} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the image scalebar} {visible}.", undefined);
+parser.defineSentence("{Set the image scalebar} {invisible}.", undefined);
+
+// Panel setup
+// -----------
+parser.defineSentence("{Set the panel} {label scheme} to {scheme:label-scheme}.", undefined);
+parser.defineSentence("{Set the panel} {label font} to {f:font}.", undefined);
+parser.defineSentence("{Set the panel} {label color} to {c:color}.", undefined);
+parser.defineSentence("{Set the panel} {label position} to {a:alignment}.", undefined);
+parser.defineSentence("{Set the panel} {label gap} to {g:float}.", undefined);
+parser.defineSentence("{Set the panel} {frame thickness} to {thickness:float}.", undefined);
+parser.defineSentence("{Set the panel} {frame color} to {color:color}.", undefined);
+parser.defineSentence("{Set the panel} {frame visible}.", undefined);
+parser.defineSentence("{Set the panel} {frame invisible}.", undefined);
+
+parser.defineType("field-of-view", "({w:int} x {h:int}) at ({x:int}, {y:int})", undefined, true);
+
+parser.defineSentence("{Layout panels} to make all rows the same height.", undefined);
+parser.defineSentence("{Layout panels} to make all columns the same width.", undefined);
+parser.defineSentence("{Layout panels} to fit the page height.", undefined);
+parser.defineSentence("{Layout panels} to fit the page width.", undefined);
+
+parser.defineType("panel", "{panel:tuple<int,row,column>}", undefined);
+
+parser.defineType("image-magnification", "preserving magnification", undefined);
+parser.defineType("image-magnification", "matching the panel size", undefined);
+
+parser.defineType("image", "{image:title}", undefined);
+
+parser.defineSentence("Add image {image:image} to panel {panel:panel} {mag:image-magnification}.", undefined);
+
+// Image manipulation
+parser.defineSentence("Modify image {image:image} {to display channels} {channels:list<int>}.", undefined);
+parser.defineSentence("Modify image {image:image} {to display timepoint} {timepoint:int}.", undefined);
+parser.defineSentence("Modify image {image:image} {to display plane} {plane:int}.", undefined);
+parser.defineSentence("Modify image {image:image} {to limit the field of view to} {fov:field-of-view}.", undefined);
+
+parser.defineType("rectangle", "{w:int} x {h:int} rectangle at ({x:int}, {y:int})", undefined, true);
+
+parser.defineSentence("Modify image {image:image} to show a {r:rectangle}.", undefined);
+parser.defineSentence("Modify image {image:image} to hide the overlay.", undefined);
+parser.defineSentence("Modify image {image:image} to show the overlay.", undefined);
+parser.defineSentence("Modify image {image:image} to clear the overlay.", undefined);
+
+new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+</code></pre>
+
+
+
+
+
+<!-- Here comes the actual javascript code that demonstrates how to use nlScript -->
+<script>
+
+let parser = new nlScript.Parser();
+
+
+parser.defineType("title", "'{title:[^']:+}'", undefined, true);
+
+parser.defineType("visibility", "visible", e => true);
+parser.defineType("visibility", "invisible", e => false);
+
+parser.defineType("font-name", "Helvetica", undefined);
+parser.defineType("font-name", "Arial", undefined);
+parser.defineType("font-name", "Courier", undefined);
+
+parser.defineType("font-style", "plain", undefined);
+parser.defineType("font-style", "bold", undefined);
+parser.defineType("font-style", "italic", undefined);
+
+parser.defineType("font-size", "{font-size:int}pt", undefined, true);
+
+parser.defineType("font", "{font-size:font-size} {font-style:font-style} {font-name:font-name}", undefined, true);
+
+parser.defineType("page-size", "A4", undefined);
+parser.defineType("page-size", "A3", undefined);
+parser.defineType("page-size", "A2", undefined);
+parser.defineType("page-size", "A1", undefined);
+parser.defineType("page-size", "A0", undefined);
+parser.defineType("page-size", "A5", undefined);
+
+parser.defineType("page-orientation", "landscape", undefined);
+parser.defineType("page-orientation", "portrait",  undefined);
+
+parser.defineType("alignment", "TOP_LEFT",      undefined); 
+parser.defineType("alignment", "TOP_CENTER",    undefined); 
+parser.defineType("alignment", "TOP_RIGHT",     undefined); 
+parser.defineType("alignment", "CENTER_LEFT",   undefined); 
+parser.defineType("alignment", "CENTERED",      undefined); 
+parser.defineType("alignment", "CENTER_RIGHT",  undefined); 
+parser.defineType("alignment", "BOTTOM_LEFT",   undefined); 
+parser.defineType("alignment", "BOTTOM_CENTER", undefined); 
+parser.defineType("alignment", "BOTTOM_RIGHT",  undefined); 
+
+parser.defineType("label-scheme", "LOWERCASE_LETTERS.", undefined); 
+parser.defineType("label-scheme", "UPPERCASE_LETTERS.", undefined); 
+parser.defineType("label-scheme", "NUMBERS.",           undefined); 
+
+parser.defineType("borders", "{borders:tuple<float,top,left,bottom,right>} mm", undefined, true);
+
+// Document setup
+// --------------
+parser.defineSentence("{Set the document} size to {ps:page-size} {po:page-orientation}.", undefined);
+parser.defineSentence("{Set the document} borders to {borders:borders}.", undefined);
+
+// Title setup
+// -----------
+parser.defineSentence("{Set the title} {text} to {title:title}.", undefined);
+parser.defineSentence("{Set the title} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the title} {font} to {f:font}.", undefined);
+
+// Headings setup
+// --------------
+parser.defineSentence("{Set the headings} {text} {of column} {c:int} to {h:title}.", undefined);
+parser.defineSentence("{Set the headings} {text} {of row} {r:int} to {h:title}.", undefined);
+parser.defineSentence("{Set the headings} {text font} to {f:font}.", undefined);
+parser.defineSentence("{Set the headings} {frame thickness} to {thickness:float}.", undefined);
+parser.defineSentence("{Set the headings} {text color} to {c:color}.", undefined);
+parser.defineSentence("{Set the headings} {frame color} to {c:color}.", undefined);
+parser.defineSentence("{Set the headings} {background color} to {c:color}.", undefined);
+parser.defineSentence("{Set the headings} {frame invisible}.", undefined);
+parser.defineSentence("{Set the headings} {frame visible}.", undefined);
+
+// Image setup
+// -----------
+parser.defineSentence("{Set the image title} {font} to {f:font}.", undefined);
+parser.defineSentence("{Set the image title} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the image title} {position} to {a:alignment}.", undefined);
+parser.defineSentence("{Set the image title} {gap} to {g:float}.", undefined);
+parser.defineSentence("{Set the image title} {visible}.", undefined);
+parser.defineSentence("{Set the image title} {invisible}.", undefined);
+parser.defineSentence("{Set the image frame} {thickness} to {thickness:float}.", undefined);
+parser.defineSentence("{Set the image frame} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the image frame} {visible}", undefined);
+parser.defineSentence("{Set the image frame} {invisible}", undefined);
+
+parser.defineType("scalebar-position", "top left",     undefined);
+parser.defineType("scalebar-position", "top right",    undefined);
+parser.defineType("scalebar-position", "bottom left",  undefined);
+parser.defineType("scalebar-position", "bottom right", undefined);
+
+parser.defineSentence("{Set the image scalebar} {position} to {position:scalebar-position}.", undefined);
+parser.defineSentence("{Set the image scalebar} {length} to {l:float}.", undefined);
+parser.defineSentence("{Set the image scalebar} {color} to {c:color}.", undefined);
+parser.defineSentence("{Set the image scalebar} {visible}.", undefined);
+parser.defineSentence("{Set the image scalebar} {invisible}.", undefined);
+
+// Panel setup
+// -----------
+parser.defineSentence("{Set the panel} {label scheme} to {scheme:label-scheme}.", undefined);
+parser.defineSentence("{Set the panel} {label font} to {f:font}.", undefined);
+parser.defineSentence("{Set the panel} {label color} to {c:color}.", undefined);
+parser.defineSentence("{Set the panel} {label position} to {a:alignment}.", undefined);
+parser.defineSentence("{Set the panel} {label gap} to {g:float}.", undefined);
+parser.defineSentence("{Set the panel} {frame thickness} to {thickness:float}.", undefined);
+parser.defineSentence("{Set the panel} {frame color} to {color:color}.", undefined);
+parser.defineSentence("{Set the panel} {frame visible}.", undefined);
+parser.defineSentence("{Set the panel} {frame invisible}.", undefined);
+
+parser.defineType("field-of-view", "({w:int} x {h:int}) at ({x:int}, {y:int})", undefined, true);
+
+parser.defineSentence("{Layout panels} to make all rows the same height.", undefined);
+parser.defineSentence("{Layout panels} to make all columns the same width.", undefined);
+parser.defineSentence("{Layout panels} to fit the page height.", undefined);
+parser.defineSentence("{Layout panels} to fit the page width.", undefined);
+
+parser.defineType("panel", "{panel:tuple<int,row,column>}", undefined);
+
+parser.defineType("image-magnification", "preserving magnification", undefined);
+parser.defineType("image-magnification", "matching the panel size", undefined);
+
+parser.defineType("image", "{image:title}", undefined);
+
+parser.defineSentence("Add image {image:image} to panel {panel:panel} {mag:image-magnification}.", undefined);
+
+// Image manipulation
+parser.defineSentence("Modify image {image:image} {to display channels} {channels:list<int>}.", undefined);
+parser.defineSentence("Modify image {image:image} {to display timepoint} {timepoint:int}.", undefined);
+parser.defineSentence("Modify image {image:image} {to display plane} {plane:int}.", undefined);
+parser.defineSentence("Modify image {image:image} {to limit the field of view to} {fov:field-of-view}.", undefined);
+
+parser.defineType("rectangle", "{w:int} x {h:int} rectangle at ({x:int}, {y:int})", undefined, true);
+
+parser.defineSentence("Modify image {image:image} to show a {r:rectangle}.", undefined);
+parser.defineSentence("Modify image {image:image} to hide the overlay.", undefined);
+parser.defineSentence("Modify image {image:image} to show the overlay.", undefined);
+parser.defineSentence("Modify image {image:image} to clear the overlay.", undefined);
+
+let editor = new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+
+editor.setText(`Set the title text to 'Mouse intestinal organoids'.
+Layout panels to make all rows the same height.
+Set the image title invisible.
+Modify image 'organoid.tif' to clear the overlay.
+Set the panel label color to white.
+
+Set the headings text color to red.
+Set the headings text of column 1 to 'Nuclei/Draq5'.
+Set the headings text color to green.
+Set the headings text of column 2 to 'Claudin/AlexaFluor-488'.
+Set the headings text color to black.
+Set the headings text of column 3 to 'Merge'.
+
+Set the headings text of row 1 to 'Overview'.
+Set the headings text of row 2 to 'Zoom'.
+
+
+Modify image 'organoid.tif' to limit the field of view to (800 x 600) at (0, 0).
+Modify image 'organoid.tif' to show a 200 x 150 rectangle at (200, 150).
+
+
+Modify image 'organoid.tif' to display channels 1.
+Add image 'organoid.tif' to panel (1, 1) matching the panel size.
+
+Modify image 'organoid.tif' to display channels 2.
+Add image 'organoid.tif' to panel (1, 2) matching the panel size.
+
+Set the image scalebar length to 20.
+Set the image scalebar visible.
+Modify image 'organoid.tif' to display channels 1, 2.
+Add image 'organoid.tif' to panel (1, 3) matching the panel size.
+Set the image scalebar invisible.
+
+
+Modify image 'organoid.tif' to limit the field of view to (200 x 150) at (200, 150).
+Modify image 'organoid.tif' to clear the overlay.
+
+Modify image 'organoid.tif' to display channels 1.
+Add image 'organoid.tif' to panel (2, 1) matching the panel size.
+
+Modify image 'organoid.tif' to display channels 2.
+Add image 'organoid.tif' to panel (2, 2) matching the panel size.
+
+Set the image scalebar visible.
+Modify image 'organoid.tif' to display channels 1, 2.
+Add image 'organoid.tif' to panel (2, 3) matching the panel size.
+`);
+
+</script>
+
+
+
+</body>
+</html>
+
+

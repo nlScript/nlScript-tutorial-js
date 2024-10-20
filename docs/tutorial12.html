@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<!-- highlight.js for nicely visualizing the javascript code, it is not needed for nlScript  -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/intellij-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<style>
+body {
+  max-width: 800px;
+  margin: auto;
+}
+h2 {
+  border-bottom: 1px solid darkgray;
+}
+.nav {
+  color: black;
+  text-decoration: none;
+  background-color: beige;
+  padding: 5px;
+  border-radius: 5px;
+}
+.nav:hover {
+  background-color: aliceblue;
+}
+</style>
+
+<!-- The only javascript file needed for nlScript -->
+<script src="https://cdn.jsdelivr.net/npm/@nlscript/nlscript@0.3.0/dist/umd/nlScript.js"></script>
+
+<h1>nlScript Demos</h1>
+
+<h3>Select another example:</h3>
+
+<div style="display: flex; justify-content: space-between;">
+<a class="nav" style="border: #88745a 3px solid;" href="tutorial12.html">Image Pre-processing</a>
+<a class="nav" style="border: #88745a 1px solid;" href="tutorial11.html">Configuring a staining robot</a>
+<a class="nav" style="border: #88745a 1px solid;" href="tutorial10.html">Arrange a scientific figure</a>
+<a class="nav" style="border: #88745a 1px solid;" target="_blank" href="https://nlscript.github.io/nlScript-microscope-language-js/">Configuring a microscope timelapse experiment</a>
+</div>
+
+<h2>Description</h2>
+
+<p>This is a simple page demonstrating an nlScript language for configuring an image pre-processing pipeline. This is just a proof of principal and does not contain any functionality, but demonstrates what such a language could look like.</p>
+
+<p>Also check out the <a href="index.html">tutorial</a>.</p>
+
+<p>Often, a newly developed image processing algorithm (e.g. <a target="_blank" href="https://github.com/StuartLab/MiNA">MiNA</a>) requires low-level pre-processing, including e.g. noise removal, feature enhancement, filtering etc.  The precise steps required depend on the image at hand and are unknown to the developers of the new algorithm, making it difficult to provide a traditional graphical user interface. Here, too, a natural-language interface inherently allows multiple pre-processing steps, to be combined in arbitrary order, even repeating individual steps with different parameters.</p>
+
+<img style="width: 100%;" src="nlScript-principle.png" />
+
+<h2>Demo</h2>
+
+<!-- The only HTML element needed for nlScript, which will be populated with the editor -->
+<div id="nls-container"></div>
+
+
+
+<h2>The code</h2>
+
+<pre><code class="javascript">
+let parser = new nlScript.Parser();
+
+parser.defineType("units", "pixel(s)", undefined);
+parser.defineType("units", "\u{03bc}m", undefined);
+
+parser.defineType("filter-size", "{stddev:float} {units:units}", undefined, true);
+
+parser.defineSentence("Apply a Median filter with radius of {radius:filter-size}.", undefined);
+parser.defineSentence("Apply an Unsharp Mask with radius of {radius:filter-size} and mask weight of {weight:float}.", undefined);
+parser.defineSentence("Enhance local contrast via CLAHE with a blocksize of {block-size:int}, {bins:int} histogram bins and a max slope of {slope:int}, using {image:[a-z-]:+} as a mask.", undefined);
+
+
+new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+</code></pre>
+
+
+
+
+
+<!-- Here comes the actual javascript code that demonstrates how to use nlScript -->
+<script>
+let parser = new nlScript.Parser();
+
+parser.defineType("units", "pixel(s)", undefined);
+parser.defineType("units", "\u{03bc}m", undefined);
+
+parser.defineType("filter-size", "{stddev:float} {units:units}", undefined, true);
+
+parser.defineSentence("Apply a Median filter with radius of {radius:filter-size}.", undefined);
+parser.defineSentence("Apply an Unsharp Mask with radius of {radius:filter-size} and mask weight of {weight:float}.", undefined);
+parser.defineSentence("Enhance local contrast via CLAHE with a blocksize of {block-size:int}, {bins:int} histogram bins and a max slope of {slope:int}, using {image:[a-z-]:+} as a mask.", undefined);
+
+
+editor = new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+editor.setText(`Apply a Median filter with radius of 2 \u{03bc}m.
+Apply an Unsharp Mask with radius of 3 pixel(s) and mask weight of 0.1.
+`);
+
+</script>
+
+
+
+</body>
+</html>
+
+

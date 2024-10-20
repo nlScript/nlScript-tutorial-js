@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<!-- highlight.js for nicely visualizing the javascript code, it is not needed for nlScript  -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/intellij-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<style>
+body {
+  max-width: 800px;
+  margin: auto;
+}
+h2 {
+  border-bottom: 1px solid darkgray;
+}
+.nav {
+  color: black;
+  text-decoration: none;
+  background-color: beige;
+  padding: 5px;
+  border-radius: 5px;
+}
+.nav:hover {
+  background-color: aliceblue;
+}
+</style>
+
+<!-- The only javascript file needed for nlScript -->
+<script src="https://cdn.jsdelivr.net/npm/@nlscript/nlscript@0.3.0/dist/umd/nlScript.js"></script>
+
+<h1>nlScript Demos</h1>
+
+<h3>Select another example:</h3>
+
+<div style="display: flex; justify-content: space-between;">
+<a class="nav" style="border: #88745a 1px solid;" href="tutorial12.html">Image Pre-processing</a>
+<a class="nav" style="border: #88745a 3px solid;" href="tutorial11.html">Configuring a staining robot</a>
+<a class="nav" style="border: #88745a 1px solid;" href="tutorial10.html">Arrange a scientific figure</a>
+<a class="nav" style="border: #88745a 1px solid;" target="_blank" href="https://nlscript.github.io/nlScript-microscope-language-js/">Configuring a microscope timelapse experiment</a>
+</div>
+
+<h2>Description</h2>
+
+<p>This is a simple page demonstrating an nlScript language for configuring a fluorescence staining robot. This is just a proof of principal and does not contain any functionality, but demonstrates what such a language could look like.</p>
+
+
+<h2>Demo</h2>
+
+<!-- The only HTML element needed for nlScript, which will be populated with the editor -->
+<div id="nls-container"></div>
+
+
+
+<h2>The code</h2>
+
+<pre><code class="javascript">
+let parser = new nlScript.Parser();
+
+let liquids = new Set();
+
+parser.defineType("dispenser", "dispenser-01", pn => 1);
+parser.defineType("dispenser", "dispenser-02", pn => 2);
+parser.defineType("dispenser", "dispenser-03", pn => 3);
+parser.defineType("dispenser", "dispenser-04", pn => 4);
+parser.defineType("dispenser", "dispenser-05", pn => 5);
+parser.defineType("dispenser", "dispenser-06", pn => 6);
+parser.defineType("dispenser", "dispenser-07", pn => 7);
+parser.defineType("dispenser", "dispenser-08", pn => 8);
+parser.defineType("dispenser", "dispenser-09", pn => 9);
+parser.defineType("dispenser", "dispenser-10", pn => 10);
+
+for(let i = 0; i < 12; i++) {
+    let c = i < 9 ? "0" + (i + 1) : "" + (i + 1);
+    parser.defineType("well-column", c, undefined);
+}
+for(let i = 0; i < 8; i++)
+    parser.defineType("well-row", String.fromCharCode('A'.charCodeAt(0) + i), undefined);
+
+parser.defineType("well", "{row:well-row}/{column:well-column}", undefined, true);
+parser.defineType("well-range", "{start:well}-{stop:well}", undefined, true);
+parser.defineType("well-or-range", "{well:well}", undefined, true);
+parser.defineType("well-or-range", "{range:well-range}", undefined, true);
+parser.defineType("wells", "{wells:list<well-or-range>:+}", undefined);
+
+
+parser.defineType("amount", "{n:int} uL", pn => pn.evaluate("n"), true);
+
+parser.defineType("liquid-name", "'{liquid:[^']:+}'", pn => pn.getParsedString("liquid"), true);
+
+parser.defineType("n-times", "once", pn => 1);
+parser.defineType("n-times", "twice", pn => 2);
+parser.defineType("n-times", "{n:int} times", pn => pn.evaluate("n"), true);
+
+parser.defineType("liquid", "PBS", pn => pn.getParsedString());
+
+parser.defineType("percentage", "{percentage:float}% {liquid:liquid}", undefined, true);
+parser.defineType("another-percentage", ", {percentage:percentage}", undefined, true);
+
+parser.defineSentence("Define solution {name:liquid-name} by diluting {first:percentage}{others:another-percentage:*} in {liquid:liquid}.", undefined).onSuccessfulParsed((pn) => {
+    if(pn.getMatcher().state == nlScript.ParsingState.SUCCESSFUL) {
+        const parsed = pn.evaluate("name");
+        if(!liquids.has(parsed)) {
+            liquids.add(parsed);
+            parser.defineType("liquid", parsed, undefined);
+        }
+    }
+});
+
+parser.defineType("time-unit", "second(s)", undefined);
+parser.defineType("time-unit", "minute(s)", undefined);
+parser.defineType("time-unit", "hour(s)", undefined);
+
+parser.defineType("duration", "{n:float} {time-unit:time-unit}", undefined, true);
+
+parser.defineType("temperature", "room temperature", null);
+parser.defineType("temperature", "{n:float} \u00B0C", null, true);
+
+parser.defineSentence("Connect {dispenser:dispenser} to {liquid:liquid-name}.", null).onSuccessfulParsed((pn) => {
+    if(pn.getMatcher().state == nlScript.ParsingState.SUCCESSFUL) {
+        const parsed = pn.evaluate("liquid");
+        if(!liquids.has(parsed)) {
+            liquids.add(parsed);
+            parser.defineType("liquid", parsed, undefined);
+        }
+    }
+});
+
+parser.defineSentence("Incubate well(s) {wells:wells} {n:n-times} with {amount:amount} {liquid:liquid} for {duration:duration} at {temperature:temperature}.", null);
+parser.defineSentence("Wash well(s) {wells:wells} {n:n-times} with {amount:amount} {liquid:liquid} for {duration:duration} at {temperature:temperature}.", null);
+parser.defineSentence("Rinse well(s) {wells:wells} {n:n-times} with {amount:amount} {liquid:liquid}.", null);
+
+parser.addParseStartListener(() => {
+    liquids.clear();
+    parser.undefineType("liquid");
+});
+
+new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+
+</code></pre>
+
+
+
+
+
+<!-- Here comes the actual javascript code that demonstrates how to use nlScript -->
+<script>
+let parser = new nlScript.Parser();
+
+let liquids = new Set();
+
+parser.defineType("dispenser", "dispenser-01", pn => 1);
+parser.defineType("dispenser", "dispenser-02", pn => 2);
+parser.defineType("dispenser", "dispenser-03", pn => 3);
+parser.defineType("dispenser", "dispenser-04", pn => 4);
+parser.defineType("dispenser", "dispenser-05", pn => 5);
+parser.defineType("dispenser", "dispenser-06", pn => 6);
+parser.defineType("dispenser", "dispenser-07", pn => 7);
+parser.defineType("dispenser", "dispenser-08", pn => 8);
+parser.defineType("dispenser", "dispenser-09", pn => 9);
+parser.defineType("dispenser", "dispenser-10", pn => 10);
+
+for(let i = 0; i < 12; i++) {
+    let c = i < 9 ? "0" + (i + 1) : "" + (i + 1);
+    parser.defineType("well-column", c, undefined);
+}
+for(let i = 0; i < 8; i++)
+    parser.defineType("well-row", String.fromCharCode('A'.charCodeAt(0) + i), undefined);
+
+parser.defineType("well", "{row:well-row}/{column:well-column}", undefined, true);
+parser.defineType("well-range", "{start:well}-{stop:well}", undefined, true);
+parser.defineType("well-or-range", "{well:well}", undefined, true);
+parser.defineType("well-or-range", "{range:well-range}", undefined, true);
+parser.defineType("wells", "{wells:list<well-or-range>:+}", undefined);
+
+
+parser.defineType("amount", "{n:int} uL", pn => pn.evaluate("n"), true);
+
+parser.defineType("liquid-name", "'{liquid:[^']:+}'", pn => pn.getParsedString("liquid"), true);
+
+parser.defineType("n-times", "once", pn => 1);
+parser.defineType("n-times", "twice", pn => 2);
+parser.defineType("n-times", "{n:int} times", pn => pn.evaluate("n"), true);
+
+parser.defineType("liquid", "PBS", pn => pn.getParsedString());
+
+parser.defineType("percentage", "{percentage:float}% {liquid:liquid}", undefined, true);
+parser.defineType("another-percentage", ", {percentage:percentage}", undefined, true);
+
+parser.defineSentence("Define solution {name:liquid-name} by diluting {first:percentage}{others:another-percentage:*} in {liquid:liquid}.", undefined).onSuccessfulParsed((pn) => {
+    if(pn.getMatcher().state == nlScript.ParsingState.SUCCESSFUL) {
+        const parsed = pn.evaluate("name");
+        if(!liquids.has(parsed)) {
+            liquids.add(parsed);
+            parser.defineType("liquid", parsed, undefined);
+        }
+    }
+});
+
+parser.defineType("time-unit", "second(s)", undefined);
+parser.defineType("time-unit", "minute(s)", undefined);
+parser.defineType("time-unit", "hour(s)", undefined);
+
+parser.defineType("duration", "{n:float} {time-unit:time-unit}", undefined, true);
+
+parser.defineType("temperature", "room temperature", null);
+parser.defineType("temperature", "{n:float} \u00B0C", null, true);
+
+parser.defineSentence("Connect {dispenser:dispenser} to {liquid:liquid-name}.", null).onSuccessfulParsed((pn) => {
+    if(pn.getMatcher().state == nlScript.ParsingState.SUCCESSFUL) {
+        const parsed = pn.evaluate("liquid");
+        if(!liquids.has(parsed)) {
+            liquids.add(parsed);
+            parser.defineType("liquid", parsed, undefined);
+        }
+    }
+});
+
+parser.defineSentence("Incubate well(s) {wells:wells} {n:n-times} with {amount:amount} {liquid:liquid} for {duration:duration} at {temperature:temperature}.", null);
+parser.defineSentence("Wash well(s) {wells:wells} {n:n-times} with {amount:amount} {liquid:liquid} for {duration:duration} at {temperature:temperature}.", null);
+parser.defineSentence("Rinse well(s) {wells:wells} {n:n-times} with {amount:amount} {liquid:liquid}.", null);
+
+parser.addParseStartListener(() => {
+    liquids.clear();
+    parser.undefineType("liquid");
+});
+
+
+let editor = new nlScript.ACEditor(parser, document.getElementById("nls-container"));
+editor.setText(`Connect dispenser-01 to 'PBS'.
+Connect dispenser-02 to 'PFA'.
+Connect dispenser-03 to 'Triton'.
+Connect dispenser-04 to 'primary antibody'.
+Connect dispenser-05 to 'secondary antibody'.
+
+Define solution '4% PFA' by diluting 4% PFA in PBS.
+Define solution '0.1% Triton' by diluting 0.1% Triton in PBS.
+Define solution 'primary antibody dilution' by diluting 0.1% primary antibody in 0.1% Triton.
+Define solution 'secondary antibody dilution' by diluting 0.1% secondary antibody in 0.1% Triton.
+
+Rinse well(s) A/01-H/12 twice with 100 uL PBS.
+Incubate well(s) A/01-H/12 once with 100 uL 4% PFA for 20 minute(s) at room temperature.
+Rinse well(s) A/01-H/12 3 times with 100 uL PBS.
+Incubate well(s) A/01-H/12 once with 100 uL 0.1% Triton for 30 minute(s) at room temperature.
+Incubate well(s) A/01-H/12 once with 100 uL primary antibody dilution for 2 hour(s) at room temperature.
+Rinse well(s) A/01-H/12 twice with 100 uL PBS.
+Wash well(s) A/01-H/12 3 times with 100 uL PBS for 5 minute(s) at room temperature.
+Incubate well(s) A/01-H/12 once with 100 uL secondary antibody dilution for 1 hour(s) at room temperature.
+Rinse well(s) A/01-H/12 twice with 100 uL PBS.
+Wash well(s) A/01-H/12 3 times with 100 uL PBS for 5 minute(s) at room temperature.
+`);
+
+</script>
+
+
+
+</body>
+</html>
+
+
